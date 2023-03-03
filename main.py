@@ -52,7 +52,7 @@ class ImdbCrawler(CrawlSpider):
 def updateDatabase():
     try:
         cursor = con.cursor()
-        with open("excel files/all-weeks-countries cleaned.csv", "rt", encoding='utf-8') as allCountries:
+        with open("excel files/all-weeks-countries.csv", "rt", encoding='utf-8') as allCountries:
             data = csv.DictReader(allCountries)
             # TODO remove the first line with the column titles
             # TODO add .lower() ?
@@ -63,7 +63,7 @@ def updateDatabase():
                                "weekly_rank,show_title,season_title,cumulative_weeks_in_top_10) VALUES "
                                "(?,?,?,?,?,?,?,?);", countriesInfo)
             allCountries.close()
-        with open("excel files/all-weeks-global cleaned.csv", "rt", encoding='utf-8') as allGlobal:
+        with open("excel files/all-weeks-global.csv", "rt", encoding='utf-8') as allGlobal:
             data = csv.DictReader(allGlobal)
             globalInfo = [(i['week'], i['category'], i['weekly_rank'], i['show_title'], i['season_title'],
                            i['weekly_hours_viewed'], i['cumulative_weeks_in_top_10']) for i in data]
@@ -71,7 +71,7 @@ def updateDatabase():
                                "weekly_hours_viewed,cumulative_weeks_in_top_10) VALUES "
                                "(?,?,?,?,?,?,?);", globalInfo)
             allGlobal.close()
-        with open("excel files/most-popular cleaned.csv", "rt", encoding='utf-8') as popular:
+        with open("excel files/most-popular.csv", "rt", encoding='utf-8') as popular:
             data = csv.DictReader(popular)
             popularInfo = [(i['category'], i['rank'], i['show_title'], i['season_title'],
                             i['hours_viewed_first_28_days']) for i in data]
