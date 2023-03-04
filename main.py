@@ -5,53 +5,19 @@ from w3lib.url import url_query_cleaner
 import extruct
 import numpy
 import pandas as pd
-import mysql.connector
 import itertools
 import webbrowser
 from imdb import Cinemagoer
+from multipledispatch import dispatch
 import matplotlib
 import csv
 import sqlite3
 
 
-def process_links(links):
-    for link in links:
-        link.url = url_query_cleaner(link.url)
-        yield link
-
-
-class ImdbCrawler(CrawlSpider):
-    name = 'imdb'
-    allowed_domains = ['www.imdb.com']
-    start_urls = ['https://www.imdb.com/']
-    rules = (
-        Rule(
-            LinkExtractor(
-                deny=[
-                    re.escape('https://www.imdb.com/offsite'),
-                    re.escape('https://www.imdb.com/whitelist-offsite'),
-                ],
-            ),
-            process_links=process_links,
-            callback='parse_item',
-            follow=True
-        ),
-    )
-
-    def parse_item(self, response):
-        return {
-            'url': response.url,
-            'metadata': extruct.extract(
-                response.text,
-                response.url,
-                syntaxes=['opengraph', 'json-ld']
-            ),
-        }
-
-
 def updateDatabase():
     try:
         cursor = con.cursor()
+        # generate the first three databases from csv files
         with open("excel files/all-weeks-countries.csv", "rt", encoding='utf-8') as allCountries:
             data = csv.DictReader(allCountries)
             # TODO remove the first line with the column titles
@@ -79,8 +45,14 @@ def updateDatabase():
                                "hours_viewed_first_28_days) VALUES "
                                "(?,?,?,?,?);", popularInfo)
             popular.close()
-        df = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title) FROM rankByCountry"))
+        # generate the genre table by using existing tables and imdb library
+        df = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title) FROM rankByCountry LIMIT 10"))
         print(df)
+        df['genres'] = df[0].apply(lambda key: genreCrawl(key))
+        print(df)
+        df.to_sql('genreInfo', con, if_exists='append')
+        df2 = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo"))
+        print(df2)
     # genreCrawl(i['show_title'])
     # TODO import the excel spreadsheet
     # TODO check most recent entry to see where to start in excel file / sort DB by date?
@@ -93,8 +65,7 @@ def updateDatabase():
         cursor.close()
 
 
-def genreCrawl(title):
-    x = 0
+def genreCrawl(title):  #TODO make this function smarter than selecting the first result
     movie = cg.get_movie(cg.search_movie(title.lower())[0].getID())
     genre = movie.get('genres')
     genres = []
@@ -153,7 +124,6 @@ def resetDatabase():
 
 con = sqlite3.connect("netflix.db")
 cg = Cinemagoer()
-crawler = ImdbCrawler()
 
 
 def main():
@@ -167,7 +137,7 @@ def main():
     # print(mov.getID())
     s = "Pasión de Gavilanes"
     print(s.title())
-    print(genreCrawl("Pasión de Gavilanes"))
+    # print(genreCrawl("Pasión de Gavilanes"))
 
     # name = list(map(lambda word: word.capitalize(), s.split()))
     # print(" ".join(name).strip())
