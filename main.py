@@ -193,7 +193,7 @@ cg = Cinemagoer()
 
 def main():
     resetDatabase()
-    initialize()
+    # initialize()
     cursor = con.cursor()
     # results = cursor.execute("SELECT * FROM rankByCountry")
     # print(cursor.description)
