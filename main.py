@@ -82,8 +82,6 @@ def updateDatabase():
         entry1 = df.at[0, 'week'].split('-')
         entry2 = df.at[3, 'week'].split('-')
         print(entry1, "\n", entry2)
-    # genreCrawl(i['show_title'])
-    # TODO import the excel spreadsheet
     # TODO check most recent entry to see where to start in excel file / sort DB by date?
     except sqlite3.DatabaseError as dbErr:
         print(dbErr)
@@ -194,8 +192,8 @@ cg = Cinemagoer()
 
 
 def main():
-    # resetDatabase()
-    # initialize()
+    resetDatabase()
+    initialize()
     cursor = con.cursor()
     # results = cursor.execute("SELECT * FROM rankByCountry")
     # print(cursor.description)
