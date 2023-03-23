@@ -1,3 +1,4 @@
 # Project exclude paths
 /venv/
 /netflix.db
+/netflix.db-journal

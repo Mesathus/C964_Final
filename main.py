@@ -59,14 +59,14 @@ def updateDatabase():
                 # update movies
                 df = pd.DataFrame(cursor.execute(f"SELECT DISTINCT show_title FROM "
                                                  f"(SELECT * FROM rankByCountry LEFT JOIN genreInfo ON show_title = title "
-                                                 f"WHERE genres IS NULL) WHERE week LIKE '{earliestYear}%' AND season_title = ''"))
+                                                 f"WHERE genres IS NULL) WHERE week LIKE '{earliestYear}%' AND season_title = '' LIMIT 5"))
                 df = df.rename(columns={0: 'title'})
                 df['genres'] = df.apply((lambda key: genreCrawl(key.title, earliestYear, False)), axis=1)
                 # df.to_sql('genreInfo', con, if_exists='append', index=False)
                 # update tv shows
                 df = pd.DataFrame(cursor.execute(f"SELECT DISTINCT show_title FROM "
                                                  f"(SELECT * FROM rankByCountry LEFT JOIN genreInfo ON show_title = title "
-                                                 f"WHERE genres IS NULL) WHERE week LIKE '{earliestYear}%' AND season_title != ''"))
+                                                 f"WHERE genres IS NULL) WHERE week LIKE '{earliestYear}%' AND season_title != '' LIMIT 5"))
                 df = df.rename(columns={0: 'title'})
                 df['genres'] = df.apply((lambda key: genreCrawl(key.title, earliestYear, True)), axis=1)
                 # df.to_sql('genreInfo', con, if_exists='append', index=False)
@@ -86,53 +86,64 @@ def updateDatabase():
     except sqlite3.DatabaseError as dbErr:
         print(dbErr)
         con.rollback()
+    except:
+        print("Something else went wrong")
     finally:
         # con.commit()
         cursor.close()
 
 
 def genreCrawl(title, year, season):  # TODO make this function smarter than selecting the first result
-    movieID = None
+    movie = None
     try:
         movieList = cg.search_movie(title.lower())
         movieList = list(filter(lambda x: len(x.data['title']) == len(title), movieList))
         closestYear = sys.maxsize
+        kind = 'tv series' if season else 'movie'
+        mList = []  # cut part from if statements
+        for m in movieList:
+            mList.append(cg.get_movie(m.getID()))
+        mList = list(filter(lambda x: len(x.data['title']) == len(title) and x.data['kind'] == kind, mList))  # end cut
+        movie = mList[0]  # default to the first/most relevant list item
         if season:
-            movieList = list(filter(lambda x:  len(x.data['title']) == len(title) and (x.data['kind'] == 'tv series'), movieList))
-            mList = []
-            for m in movieList:  # bias towards shows with more seasons
-                mList.append(cg.get_movie(m.getID()))
             for m in mList:
-                seasons = len(m.data['seasons']) - 1
-                topSeasons = 0
-                if year - (m['year'] + seasons) < closestYear:
-                    movieID = m.getID()
-                    closestYear = year - m['year']
-                elif year - (m['year'] + seasons) == closestYear:
-                    if seasons > topSeasons:
-                        topSeasons = seasons
-                        movieID = m.getID()
-                        closestYear = year - (m['year'] + seasons)
+                if year - m.data['year'] < 0:
+                    continue  # if m aired after our current update year skip it
+                seasons = len(m.data['seasons'])
+                if year - m.data['year'] - seasons <= 0:  # check if title could have been airing during current year
+                    # update to best fit
+                    if m.data['year'] < movie.data['year']:  # bias to the oldest show still running
+                        movie = m
+                    elif m.data['year'] == movie.data['year']:  # shows debuting the same year
+                        if len(m.data['seasons']) > len(movie.data['seasons']):  # bias to shows with more seasons if aired same year
+                            movie = m
         else:
-            movieList = list(filter(lambda x:  len(x.data['title']) == len(title) and (x.data['kind'] == 'movie'), movieList))
-            for m in movieList:
-                if (year - m['year']) < closestYear:
-                    movieID = m.getID()
+            for m in mList:
+                if closestYear > (year - m['year']) >= 0:  # bias to most relevant release, make sure closest isn't negative
+                    movie = m
                     closestYear = year - m['year']
     except KeyError as kErr:
+        print("Key error")
         print(kErr)
-        print(movieID)
+        print(movie)
+    except TypeError as tErr:
+        print("Something else went wrong.")
+        print(tErr)
+        print(sys.exc_info())
     finally:
-        movie = cg.get_movie(movieID)
-        genre = movie.get('genres')
-        genres = []
-        for g in genre:
-            genres.append(g.lower())
-        return str(genres)
+        return getGenres(movie)
 
 
 def filterDate(csvFile):  # TODO compare existing database most recent date to csv file dates
     cursor = con.cursor()
+
+
+def getGenres(movie):
+    genre = movie.get('genres')
+    genres = []
+    for g in genre:
+        genres.append(g.lower())
+    return str(genres)
 
 
 def recommender():
@@ -192,7 +203,6 @@ cg = Cinemagoer()
 
 
 def main():
-    resetDatabase()
     # resetDatabase()
     # initialize()
     cursor = con.cursor()
@@ -209,7 +219,7 @@ def main():
     # print(movie.get('genres'))
     # url = "https://www.imdb.com/title/tt" + mov[0].getID()
     # webbrowser.open(url, new=2, autoraise=True)
-    # updateDatabase()
+    updateDatabase()
     # df = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry WHERE season_title != '' ORDER BY show_title"))
     # df2 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry WHERE season_title = '' ORDER BY show_title"))
     # df3 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry ORDER BY show_title"))
