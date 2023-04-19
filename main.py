@@ -12,6 +12,10 @@ from multipledispatch import dispatch
 import matplotlib
 import datetime
 from timeit import default_timer
+import Logger
+import tkinter as tk
+from tkinter import *
+from tkinter import ttk
 import sys
 import csv
 import sqlite3
@@ -21,6 +25,7 @@ def updateDatabase():
     try:
         cursor = con.cursor()
         # generate the first three databases from csv files
+        # TODO write a function to handle database creation
         with open("excel files/all-weeks-countries.csv", "rt", encoding='utf-8') as allCountries:
             data = csv.DictReader(allCountries)
             # TODO add .lower() ?
@@ -50,7 +55,7 @@ def updateDatabase():
         df = pd.DataFrame(cursor.execute("SELECT DISTINCT show_title FROM rankByCountry "
                                          "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
                                          "WHERE genres IS NULL LIMIT 5"))
-        if df.values.size > 0:  # check if genre table even needs to be updated
+        if df.values.size > 0:  # check if genre table even needs to be updated    change back to if > 0 when done
             earliestYear = int(pd.DataFrame(cursor.execute("SELECT week FROM rankByCountry WHERE season_title != '' "
                                                            "ORDER BY week ASC LIMIT 1"))[0].values[0].split('-')[0])
             latestYear = int(pd.DataFrame(cursor.execute("SELECT week FROM rankByCountry WHERE season_title != '' "
@@ -59,52 +64,58 @@ def updateDatabase():
                 # update movies
                 df = pd.DataFrame(cursor.execute(f"SELECT DISTINCT show_title FROM "
                                                  f"(SELECT * FROM rankByCountry LEFT JOIN genreInfo ON show_title = title "
-                                                 f"WHERE genres IS NULL) WHERE week LIKE '{earliestYear}%' AND season_title = '' LIMIT 5"))
-                df = df.rename(columns={0: 'title'})
-                df['genres'] = df.apply((lambda key: genreCrawl(key.title, earliestYear, False)), axis=1)
-                # df.to_sql('genreInfo', con, if_exists='append', index=False)
+                                                 f"WHERE genres IS NULL) WHERE week LIKE '{earliestYear}%' AND season_title = '' LIMIT 200"))
+                if df.values.size > 0:
+                    df = df.rename(columns={0: 'title'})
+                    df['genres'] = df.apply((lambda key: genreCrawl(key.title, earliestYear, False)), axis=1)
+                    df.to_sql('genreInfo', con, if_exists='append', index=False)
                 # update tv shows
                 df = pd.DataFrame(cursor.execute(f"SELECT DISTINCT show_title FROM "
                                                  f"(SELECT * FROM rankByCountry LEFT JOIN genreInfo ON show_title = title "
-                                                 f"WHERE genres IS NULL) WHERE week LIKE '{earliestYear}%' AND season_title != '' LIMIT 5"))
-                df = df.rename(columns={0: 'title'})
-                df['genres'] = df.apply((lambda key: genreCrawl(key.title, earliestYear, True)), axis=1)
-                # df.to_sql('genreInfo', con, if_exists='append', index=False)
+                                                 f"WHERE genres IS NULL) WHERE week LIKE '{earliestYear}%' AND season_title != '' LIMIT 100"))
+                if df.values.size > 0:
+                    df = df.rename(columns={0: 'title'})
+                    df['genres'] = df.apply((lambda key: genreCrawl(key.title, earliestYear, True)), axis=1)
+                    df.to_sql('genreInfo', con, if_exists='append', index=False)
                 earliestYear += 1
-        print(pd.DataFrame(cursor.execute("SELECT * FROM genreInfo")))
+        # print(pd.DataFrame(cursor.execute("SELECT * FROM genreInfo")))
         # df.drop(columns={'week', "season"}, inplace=True)
-        print(pd.DataFrame(cursor.execute("SELECT * FROM genreInfo")))
+        # print(pd.DataFrame(cursor.execute("SELECT * FROM genreInfo")))
         args = ['country_name', 'week']  # for creating variable search queries from user selected categories,  not for this module
         query = f"SELECT {(lambda x: ', '.join(x))(args)} FROM rankByCountry ORDER BY show_title DESC LIMIT 50"
-        df = pd.DataFrame(cursor.execute(query))
-        print("\n", df.info)
-        df.rename(mapper=lambda x: args[x], axis=1, inplace=True)  # using the args list to rename columns
-        entry1 = df.at[0, 'week'].split('-')
-        entry2 = df.at[3, 'week'].split('-')
-        print(entry1, "\n", entry2)
+        # df = pd.DataFrame(cursor.execute(query))
+        # print("\n", df.info)
+        # df.rename(mapper=lambda x: args[x], axis=1, inplace=True)  # using the args list to rename columns
+        # entry1 = df.at[0, 'week'].split('-')
+        # entry2 = df.at[3, 'week'].split('-')
+        # print(entry1, "\n", entry2)
     # TODO check most recent entry to see where to start in excel file / sort DB by date?
     except sqlite3.DatabaseError as dbErr:
         print(dbErr)
         con.rollback()
-    except:
-        print("Something else went wrong")
+    except Exception as ex:
+        print(ex)
+        print(ex.__traceback__)
     finally:
-        # con.commit()
+        con.commit()
         cursor.close()
 
 
-def genreCrawl(title, year, season):  # TODO make this function smarter than selecting the first result
+def genreCrawl(title, year, season) -> str:  # TODO make this function smarter than selecting the first result
     movie = None
     try:
         movieList = cg.search_movie(title.lower())
-        movieList = list(filter(lambda x: len(x.data['title']) == len(title), movieList))
+        # movieList = list(filter(lambda x: len(x.data['title']) == len(title), movieList))
         closestYear = sys.maxsize
-        kind = 'tv series' if season else 'movie'
+        kind = 'tv series' if season else 'movie'  # python ternary equivalent
         mList = []  # cut part from if statements
         for m in movieList:
             mList.append(cg.get_movie(m.getID()))
-        mList = list(filter(lambda x: len(x.data['title']) == len(title) and x.data['kind'] == kind, mList))  # end cut
         movie = mList[0]  # default to the first/most relevant list item
+        mList = list(filter(lambda x: len(x.data['title']) == len(title) and x.data['kind'] == kind, mList))  # end cut
+        movie = mList[0]  # adjust default after filtering
+        mList = list(filter(lambda x: x.data['title'].lower() == title.lower() and x.data['kind'] == kind, mList))
+        movie = mList[0]
         if season:
             for m in mList:
                 if year - m.data['year'] < 0:
@@ -123,26 +134,98 @@ def genreCrawl(title, year, season):  # TODO make this function smarter than sel
                     movie = m
                     closestYear = year - m['year']
     except KeyError as kErr:
-        print("Key error")
         print(kErr)
+        print(title)
         print(movie)
+        Logger.log(kErr)
+        Logger.log(movieList)
     except TypeError as tErr:
-        print("Something else went wrong.")
         print(tErr)
-        print(sys.exc_info())
+        print(title)
+        print(movie)
+        Logger.log(tErr)
+        Logger.log(movieList)
+    except Exception as ex:
+        print(ex)
+        print(title)
+        print(movie)
+        Logger.log(ex)
+        Logger.log(movieList)
     finally:
+        #  return in the finally clause, so we can use mList[0] if an
+        #  Error is thrown from one of IMDBs weird classifications
         return getGenres(movie)
+
+
+def buildGUI(root):
+    # TODO build GUI
+    cursor = con.cursor()
+    try:
+        root.geometry('500x500')
+        df = pd.DataFrame(cursor.execute("SELECT DISTINCT country_name FROM rankByCountry;"))
+        # declare GUI elements
+        countryCBox = ttk.Combobox(root, width=50, textvariable=tk.StringVar())
+        genreCBox = ttk.Combobox(root, width=50, textvariable=tk.StringVar())
+        btnStuff = ttk.Button(root, command=recommender(), width=30, text="Predict")
+        exitMenu = Menu(root)
+        movies = tk.BooleanVar
+        tvShows = tk.BooleanVar
+        chkFrame = ttk.Frame(root)
+        chkMovie = ttk.Checkbutton(master=chkFrame, text="Movies", variable=movies, onvalue=True, offvalue=False)
+        chkTV = ttk.Checkbutton(master=chkFrame, text="TV Series", variable=tvShows, onvalue=True, offvalue=False)
+        # assign additional values to GUI
+        chkMovie.selection_clear()
+        vals = list(df.to_numpy(dtype=str).flatten())  # to_numpy gives a tuple, flatten before we convert to a list
+        countryCBox['values'] = vals  # if we don't convert to a list combobox breaks words with spaces to separate rows
+        df = pd.DataFrame(cursor.execute("SELECT genres FROM genreInfo;"))
+        vals = list(df.to_numpy(dtype=str).flatten())
+        genreSet = set()
+        for x in vals:
+            s = x.replace('[', '').replace(']', '').replace('\'', '').split(',')
+            for y in s:
+                genreSet.add(y.strip().capitalize())
+        # genreSet = set(itertools.chain(vals))  # test this https://datagy.io/python-flatten-list-of-lists/
+        genreCBox['values'] = list(genreSet)
+
+
+        framePredict = ttk.Frame()
+        frameCompare = ttk.Frame()
+        exitMenu.add_command(label="Exit", command=exit)
+        # add elements to the root window
+        countryCBox.pack()
+        genreCBox.pack()
+        btnStuff.pack()
+        chkFrame.pack()
+        chkMovie.pack()
+        chkTV.pack()
+    except TypeError as TErr:
+        print(TErr)
+    except sqlite3.DatabaseError as DBErr:
+        print(DBErr)
+    finally:
+        cursor.close()
 
 
 def filterDate(csvFile):  # TODO compare existing database most recent date to csv file dates
     cursor = con.cursor()
 
 
-def getGenres(movie):
-    genre = movie.get('genres')
+def getGenres(movie) -> str:
     genres = []
-    for g in genre:
-        genres.append(g.lower())
+    try:
+        genre = movie.get('genres')
+        for g in genre:
+            genres.append(g.lower())
+    except TypeError as TErr:
+        Logger.log(TErr)
+        Logger.log(movie)
+        return "none"
+    except AttributeError as AErr:
+        Logger.log(AErr)
+        Logger.log(movie)
+        return "none"
+    except Exception as ex:
+        print(ex)
     return str(genres)
 
 
@@ -154,7 +237,7 @@ def recommender():
     cursor.close()
 
 
-def initialize():
+def initialize() -> None:
     cursor = con.cursor()
     try:
         cursor.execute("SELECT * FROM rankByCountry")
@@ -180,7 +263,7 @@ def initialize():
         cursor.close()
 
 
-def resetDatabase():
+def resetDatabase() -> None:
     cursor = con.cursor()
     try:
         cursor.executescript(""
@@ -197,15 +280,11 @@ def resetDatabase():
         con.commit()
 
 
-sys.stdout.reconfigure(encoding='utf-8')
-con = sqlite3.connect("netflix.db")
-cg = Cinemagoer()
-
-
 def main():
     # resetDatabase()
     # initialize()
     cursor = con.cursor()
+    root = Tk()
     # results = cursor.execute("SELECT * FROM rankByCountry")
     # print(cursor.description)
     # print(results.fetchmany(10))
@@ -219,8 +298,20 @@ def main():
     # print(movie.get('genres'))
     # url = "https://www.imdb.com/title/tt" + mov[0].getID()
     # webbrowser.open(url, new=2, autoraise=True)
+    print("Updating tables")
     updateDatabase()
-    # df = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry WHERE season_title != '' ORDER BY show_title"))
+    df5 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title, genres FROM rankByCountry "
+                                      "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
+                                      "WHERE genreInfo.genres IS NULL ORDER BY show_title"))
+
+    buildGUI(root)
+    root.mainloop()
+    df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo ORDER BY title"))
+    # rename the columns for the csv
+    genreCSV = df.to_csv('excel files/genre-info.csv', index=False)
+    df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo WHERE genres = 'none' ORDER BY title"))
+
+
     # df2 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry WHERE season_title = '' ORDER BY show_title"))
     # df3 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry ORDER BY show_title"))
     # df4 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title) FROM rankByCountry ORDER BY show_title"))
@@ -235,4 +326,7 @@ def main():
         con.close()
 
 
+sys.stdout.reconfigure(encoding='utf-8')
+con = sqlite3.connect("netflix.db")
+cg = Cinemagoer()
 main()
