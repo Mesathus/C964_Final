@@ -22,8 +22,8 @@ import sqlite3
 
 
 def updateDatabase():
+    cursor = con.cursor()
     try:
-        cursor = con.cursor()
         # generate the first three databases from csv files
         # TODO write a function to handle database creation
         with open("excel files/all-weeks-countries.csv", "rt", encoding='utf-8') as allCountries:
@@ -157,53 +157,78 @@ def genreCrawl(title, year, season) -> str:  # TODO make this function smarter t
         return getGenres(movie)
 
 
-def buildGUI(root):
+class BuildGUI:  # this would be better as a class
     # TODO build GUI
-    cursor = con.cursor()
-    try:
-        root.geometry('500x500')
-        df = pd.DataFrame(cursor.execute("SELECT DISTINCT country_name FROM rankByCountry;"))
-        # declare GUI elements
-        countryCBox = ttk.Combobox(root, width=50, textvariable=tk.StringVar())
-        genreCBox = ttk.Combobox(root, width=50, textvariable=tk.StringVar())
-        btnStuff = ttk.Button(root, command=recommender(), width=30, text="Predict")
-        exitMenu = Menu(root)
-        movies = tk.BooleanVar
-        tvShows = tk.BooleanVar
-        chkFrame = ttk.Frame(root)
-        chkMovie = ttk.Checkbutton(master=chkFrame, text="Movies", variable=movies, onvalue=True, offvalue=False)
-        chkTV = ttk.Checkbutton(master=chkFrame, text="TV Series", variable=tvShows, onvalue=True, offvalue=False)
-        # assign additional values to GUI
-        chkMovie.selection_clear()
-        vals = list(df.to_numpy(dtype=str).flatten())  # to_numpy gives a tuple, flatten before we convert to a list
-        countryCBox['values'] = vals  # if we don't convert to a list combobox breaks words with spaces to separate rows
-        df = pd.DataFrame(cursor.execute("SELECT genres FROM genreInfo;"))
-        vals = list(df.to_numpy(dtype=str).flatten())
-        genreSet = set()
-        for x in vals:
-            s = x.replace('[', '').replace(']', '').replace('\'', '').split(',')
-            for y in s:
-                genreSet.add(y.strip().capitalize())
-        # genreSet = set(itertools.chain(vals))  # test this https://datagy.io/python-flatten-list-of-lists/
-        genreCBox['values'] = list(genreSet)
+    def __init__(self, connection, root):
+        self.cursor = connection.cursor()
+        try:
+            root.geometry('500x500')
+            df = pd.DataFrame(self.cursor.execute("SELECT DISTINCT country_name FROM rankByCountry;"))
+            # declare GUI elements
+            # frames
+            self.chkFrame = ttk.Frame(root)
+            self.graphFrame = ttk.Frame(root)
+            # variables
+            self.movies = tk.BooleanVar()
+            self.tvShows = tk.BooleanVar()
+            self.country = tk.StringVar()
+            self.genre = tk.StringVar()
+            # interactables
+            self.countryCBox = ttk.Combobox(root, width=50, textvariable=self.country)
+            self.genreCBox = ttk.Combobox(root, width=50, textvariable=self.genre)
+            self.btnStuff = ttk.Button(root, command=self.recommender, width=30, text="Predict")
+            self.exitMenu = Menu(root)
+            root.config(menu=self.exitMenu)
+            self.chkMovie = ttk.Checkbutton(master=self.chkFrame, text="Movies", variable=self.movies, onvalue=True, offvalue=False)
+            self.chkTV = ttk.Checkbutton(master=self.chkFrame, text="TV Series", variable=self.tvShows, onvalue=True, offvalue=False)
+            # labels
+            regionLabel = ttk.Label(root, text="Select a country: ")
+            genreLabel = ttk.Label(root, text="Select a genre: ")
+            # assign additional values to GUI
+            self.chkMovie.selection_clear()
+            vals = list(df.to_numpy(dtype=str).flatten())  # to_numpy gives a tuple, flatten before we convert to a list
+            self.countryCBox['values'] = vals  # if we don't convert to a list combobox breaks words with spaces to separate rows
+            df = pd.DataFrame(self.cursor.execute("SELECT genres FROM genreInfo;"))
+            vals = list(df.to_numpy(dtype=str).flatten())
+            genreSet = set()
+            for x in vals:
+                s = x.replace('[', '').replace(']', '').replace('\'', '').split(',')
+                for y in s:
+                    genreSet.add(y.strip().capitalize())
+            # genreSet = set(itertools.chain(vals))  # test this https://datagy.io/python-flatten-list-of-lists/
+            self.genreCBox['values'] = list(genreSet)
+            self.framePredict = ttk.Frame()
+            self.frameCompare = ttk.Frame()
+            self.exitMenu.add_command(label="Exit", command=exit)
+            # add elements to the root window
+            self.countryCBox.pack()
+            self.genreCBox.pack()
+            self.btnStuff.pack()
+            self.chkFrame.pack()
+            self.chkMovie.pack()
+            self.chkTV.pack()
+        except TypeError as TErr:
+            print(TErr)
+        except sqlite3.DatabaseError as DBErr:
+            print(DBErr)
 
+    def recommender(self):
+        cursor = con.cursor()
+        # TODO collect user input
+        # TODO search DB for matching information and run regression
+        # TODO make recommendations based on criteria (user specified?)
+        try:
+            print(self.country.get(), self.genre.get(), self.movies.get(), self.tvShows.get())
+        except TypeError as TErr:
+            print(TErr)
+        except sqlite3.DatabaseError as DBErr:
+            print(DBErr)
+        finally:
+            cursor.close()
 
-        framePredict = ttk.Frame()
-        frameCompare = ttk.Frame()
-        exitMenu.add_command(label="Exit", command=exit)
-        # add elements to the root window
-        countryCBox.pack()
-        genreCBox.pack()
-        btnStuff.pack()
-        chkFrame.pack()
-        chkMovie.pack()
-        chkTV.pack()
-    except TypeError as TErr:
-        print(TErr)
-    except sqlite3.DatabaseError as DBErr:
-        print(DBErr)
-    finally:
-        cursor.close()
+    def __del__(self):
+        if self.cursor:
+            self.cursor.close()
 
 
 def filterDate(csvFile):  # TODO compare existing database most recent date to csv file dates
@@ -229,12 +254,19 @@ def getGenres(movie) -> str:
     return str(genres)
 
 
-def recommender():
+def recommender(country, genres, movie, tv):
     cursor = con.cursor()
     # TODO collect user input
     # TODO search DB for matching information and run regression
     # TODO make recommendations based on criteria (user specified?)
-    cursor.close()
+    try:
+        print(country, genres, movie, tv)
+    except TypeError as TErr:
+        print(TErr)
+    except sqlite3.DatabaseError as DBErr:
+        print(DBErr)
+    finally:
+        cursor.close()
 
 
 def initialize() -> None:
@@ -304,11 +336,14 @@ def main():
                                       "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
                                       "WHERE genreInfo.genres IS NULL ORDER BY show_title"))
 
-    buildGUI(root)
+    app = BuildGUI(con, root)
     root.mainloop()
-    df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo ORDER BY title"))
+    args = ['title', 'genres']  # for creating variable search queries from user selected categories,  not for this module
+    query = f"SELECT {(lambda x: ', '.join(x))(args)} FROM genreInfo ORDER BY title"
+    df = pd.DataFrame(cursor.execute(query))
+    df.rename(mapper=lambda x: args[x], axis=1, inplace=True)  # using the args list to rename columns
     # rename the columns for the csv
-    genreCSV = df.to_csv('excel files/genre-info.csv', index=False)
+    # genreCSV = df.to_csv('excel files/genre-info.csv', index=False)
     df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo WHERE genres = 'none' ORDER BY title"))
 
 
@@ -329,4 +364,5 @@ def main():
 sys.stdout.reconfigure(encoding='utf-8')
 con = sqlite3.connect("netflix.db")
 cg = Cinemagoer()
-main()
+if __name__ == "__main__":
+    main()
