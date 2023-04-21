@@ -1,15 +1,10 @@
-import re
-from scrapy.linkextractors import LinkExtractor
-from scrapy.spiders import CrawlSpider, Rule
-from w3lib.url import url_query_cleaner
-import extruct
 import numpy
 import pandas as pd
 import itertools
 import webbrowser
 from imdb import Cinemagoer
 from multipledispatch import dispatch
-import matplotlib
+import matplotlib as mpl
 import datetime
 from timeit import default_timer
 import Logger
@@ -157,35 +152,59 @@ def genreCrawl(title, year, season) -> str:  # TODO make this function smarter t
         return getGenres(movie)
 
 
-class BuildGUI:  # this would be better as a class
+class BuildGUI:
     # TODO build GUI
     def __init__(self, connection, root):
         self.cursor = connection.cursor()
+        self.root = root
+        # declare GUI elements
+        # frames
+        self.chkFrame = ttk.Frame(self.root)
+        self.graphFrame = ttk.Frame(self.root)
+        self.framePredict = ttk.Frame(self.root)
+        self.frameCompare = ttk.Frame(self.root)
+        # variables
+        self.movies = tk.BooleanVar()
+        self.tvShows = tk.BooleanVar()
+        self.country = tk.StringVar()
+        self.genre = tk.StringVar()
+        # interactables
+        self.countryCBox = ttk.Combobox(self.root, width=50, textvariable=self.country)
+        self.genreCBox = ttk.Combobox(self.root, width=50, textvariable=self.genre)
+        self.btnStuff = ttk.Button(self.root, command=self.recommender, width=30, text="Predict")
+        self.exitMenu = Menu(self.root)
+        self.root.config(menu=self.exitMenu)
+        self.chkMovie = ttk.Checkbutton(master=self.chkFrame, text="Movies", variable=self.movies, onvalue=True,
+                                        offvalue=False)
+        self.chkTV = ttk.Checkbutton(master=self.chkFrame, text="TV Series", variable=self.tvShows, onvalue=True,
+                                     offvalue=False)
+        self.imdbGUI()
+
+    def recommender(self):
+        # TODO search DB for matching information and run regression
+        # TODO make recommendations based on criteria (user specified?)
         try:
-            root.geometry('500x500')
+            print(self.country.get(), self.genre.get(), self.movies.get(), self.tvShows.get())
+            category = " IS NULL " if not self.tvShows.get() and not self.movies.get() else " LIKE '%' " \
+                if self.tvShows.get() and self.movies.get() else " = 'TV' " if self.tvShows.get() else " = 'Films' "
+            query = f"SELECT * FROM rankByCountry LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title " \
+                    f"WHERE genres LIKE '%{self.genre.get().lower()}%' AND country" \
+                    f"_name = '{self.country.get()}' AND category {category} "
+            df = pd.DataFrame(self.cursor.execute(query))
+            x = 5
+        except TypeError as TErr:
+            print(TErr)
+        except sqlite3.DatabaseError as DBErr:
+            print(DBErr)
+
+    def imdbGUI(self):
+        try:
+            self.root.geometry('500x500')
             df = pd.DataFrame(self.cursor.execute("SELECT DISTINCT country_name FROM rankByCountry;"))
-            # declare GUI elements
-            # frames
-            self.chkFrame = ttk.Frame(root)
-            self.graphFrame = ttk.Frame(root)
-            # variables
-            self.movies = tk.BooleanVar()
-            self.tvShows = tk.BooleanVar()
-            self.country = tk.StringVar()
-            self.genre = tk.StringVar()
-            # interactables
-            self.countryCBox = ttk.Combobox(root, width=50, textvariable=self.country)
-            self.genreCBox = ttk.Combobox(root, width=50, textvariable=self.genre)
-            self.btnStuff = ttk.Button(root, command=self.recommender, width=30, text="Predict")
-            self.exitMenu = Menu(root)
-            root.config(menu=self.exitMenu)
-            self.chkMovie = ttk.Checkbutton(master=self.chkFrame, text="Movies", variable=self.movies, onvalue=True, offvalue=False)
-            self.chkTV = ttk.Checkbutton(master=self.chkFrame, text="TV Series", variable=self.tvShows, onvalue=True, offvalue=False)
             # labels
-            regionLabel = ttk.Label(root, text="Select a country: ")
-            genreLabel = ttk.Label(root, text="Select a genre: ")
+            regionLabel = ttk.Label(self.root, text="Select a country: ")
+            genreLabel = ttk.Label(self.root, text="Select a genre: ")
             # assign additional values to GUI
-            self.chkMovie.selection_clear()
             vals = list(df.to_numpy(dtype=str).flatten())  # to_numpy gives a tuple, flatten before we convert to a list
             self.countryCBox['values'] = vals  # if we don't convert to a list combobox breaks words with spaces to separate rows
             df = pd.DataFrame(self.cursor.execute("SELECT genres FROM genreInfo;"))
@@ -194,11 +213,10 @@ class BuildGUI:  # this would be better as a class
             for x in vals:
                 s = x.replace('[', '').replace(']', '').replace('\'', '').split(',')
                 for y in s:
-                    genreSet.add(y.strip().capitalize())
+                    if y.strip() != 'none':
+                        genreSet.add(y.strip().capitalize())
             # genreSet = set(itertools.chain(vals))  # test this https://datagy.io/python-flatten-list-of-lists/
             self.genreCBox['values'] = list(genreSet)
-            self.framePredict = ttk.Frame()
-            self.frameCompare = ttk.Frame()
             self.exitMenu.add_command(label="Exit", command=exit)
             # add elements to the root window
             self.countryCBox.pack()
@@ -212,27 +230,11 @@ class BuildGUI:  # this would be better as a class
         except sqlite3.DatabaseError as DBErr:
             print(DBErr)
 
-    def recommender(self):
-        cursor = con.cursor()
-        # TODO collect user input
-        # TODO search DB for matching information and run regression
-        # TODO make recommendations based on criteria (user specified?)
-        try:
-            print(self.country.get(), self.genre.get(), self.movies.get(), self.tvShows.get())
-        except TypeError as TErr:
-            print(TErr)
-        except sqlite3.DatabaseError as DBErr:
-            print(DBErr)
-        finally:
-            cursor.close()
-
     def __del__(self):
-        if self.cursor:
+        try:
             self.cursor.close()
-
-
-def filterDate(csvFile):  # TODO compare existing database most recent date to csv file dates
-    cursor = con.cursor()
+        except sqlite3.ProgrammingError:
+            return
 
 
 def getGenres(movie) -> str:
@@ -254,17 +256,13 @@ def getGenres(movie) -> str:
     return str(genres)
 
 
-def recommender(country, genres, movie, tv):
+def manualUpdates():
     cursor = con.cursor()
-    # TODO collect user input
-    # TODO search DB for matching information and run regression
-    # TODO make recommendations based on criteria (user specified?)
     try:
-        print(country, genres, movie, tv)
-    except TypeError as TErr:
-        print(TErr)
-    except sqlite3.DatabaseError as DBErr:
-        print(DBErr)
+        df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo WHERE genres = 'none' ORDER BY title"))
+        Logger.createManualUpdateList(df)
+    except sqlite3.DatabaseError as DErr:
+        Logger.log(DErr)
     finally:
         cursor.close()
 
@@ -332,6 +330,7 @@ def main():
     # webbrowser.open(url, new=2, autoraise=True)
     print("Updating tables")
     updateDatabase()
+    # manualUpdates()
     df5 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title, genres FROM rankByCountry "
                                       "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
                                       "WHERE genreInfo.genres IS NULL ORDER BY show_title"))
@@ -345,7 +344,7 @@ def main():
     # rename the columns for the csv
     # genreCSV = df.to_csv('excel files/genre-info.csv', index=False)
     df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo WHERE genres = 'none' ORDER BY title"))
-
+    df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo WHERE genres LIKE '%drama%'"))
 
     # df2 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry WHERE season_title = '' ORDER BY show_title"))
     # df3 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry ORDER BY show_title"))
