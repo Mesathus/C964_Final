@@ -25,7 +25,6 @@ def updateDatabase():
         # TODO write a function to handle database creation
         with open("excel files/all-weeks-countries.csv", "rt", encoding='utf-8') as allCountries:
             data = csv.DictReader(allCountries)
-            # TODO add .lower() ?
             countriesInfo = [(i['country_name'], i['country_iso2'], i['week'], i['category'], i['weekly_rank'],
                               i['show_title'], i['season_title'], i['cumulative_weeks_in_top_10']) for i in data]
             cursor.executemany("INSERT OR IGNORE INTO rankByCountry (country_name,country_iso2,week,category,"
@@ -92,7 +91,7 @@ def updateDatabase():
         # entry1 = df.at[0, 'week'].split('-')
         # entry2 = df.at[3, 'week'].split('-')
         # print(entry1, "\n", entry2)
-    # TODO check most recent entry to see where to start in excel file / sort DB by date?
+        manualUpdates()
     except sqlite3.DatabaseError as dbErr:
         print(dbErr)
         con.rollback()
@@ -161,7 +160,6 @@ def genreCrawl(title, year, season) -> str:  # TODO make this function smarter t
 
 
 class BuildGUI:
-    # TODO build GUI
     def __init__(self, connection, root):
         self.cursor = connection.cursor()
         self.root = root
@@ -354,7 +352,6 @@ def main():
     # webbrowser.open(url, new=2, autoraise=True)
     print("Updating tables")
     updateDatabase()
-    # manualUpdates()
     df5 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title, genres FROM rankByCountry "
                                       "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
                                       "WHERE genreInfo.genres IS NULL ORDER BY show_title"))
