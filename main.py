@@ -11,6 +11,8 @@ import Logger
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
+from statsmodels.formula.api import ols
+import sklearn as skl
 import sys
 import csv
 import sqlite3
@@ -46,11 +48,17 @@ def updateDatabase():
                                "hours_viewed_first_28_days) VALUES "
                                "(?,?,?,?,?);", popularInfo)
             popular.close()
+        with open("excel files/genre-info.csv", "rt", encoding='utf-8') as genres:
+            data = csv.DictReader(genres)
+            genreInfo = [(i['title'], i['genres']) for i in data]
+            cursor.executemany("INSERT OR IGNORE INTO genreInfo (title, genres) VALUES "
+                               "(?,?);", genreInfo)
+            genres.close()
         # generate the genre table by using existing tables and imdb library
         df = pd.DataFrame(cursor.execute("SELECT DISTINCT show_title FROM rankByCountry "
                                          "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
                                          "WHERE genres IS NULL LIMIT 5"))
-        if df.values.size > 0:  # check if genre table even needs to be updated    change back to if > 0 when done
+        if df.values.size > 0:  # check if genre table even needs to be updated
             earliestYear = int(pd.DataFrame(cursor.execute("SELECT week FROM rankByCountry WHERE season_title != '' "
                                                            "ORDER BY week ASC LIMIT 1"))[0].values[0].split('-')[0])
             latestYear = int(pd.DataFrame(cursor.execute("SELECT week FROM rankByCountry WHERE season_title != '' "
@@ -182,7 +190,7 @@ class BuildGUI:
 
     def recommender(self):
         # TODO search DB for matching information and run regression
-        # TODO make recommendations based on criteria (user specified?)
+        # TODO make recommendations based on criteria
         try:
             print(self.country.get(), self.genre.get(), self.movies.get(), self.tvShows.get())
             category = " IS NULL " if not self.tvShows.get() and not self.movies.get() else " LIKE '%' " \
@@ -191,7 +199,21 @@ class BuildGUI:
                     f"WHERE genres LIKE '%{self.genre.get().lower()}%' AND country" \
                     f"_name = '{self.country.get()}' AND category {category} "
             df = pd.DataFrame(self.cursor.execute(query))
-            x = 5
+            df2021rank = pd.DataFrame(self.cursor.execute(f"SELECT show_title,season_title,cumulative_weeks_in_top_10,"
+                                                          f"week,genres FROM rankByCountry LEFT JOIN genreInfo ON "
+                                                          f"rankByCountry.show_title = genreInfo.title WHERE "
+                                                          f"genres LIKE '%{self.genre.get().lower()}%' AND country_name "
+                                                          f"= '{self.country.get()}' AND category {category} AND week "
+                                                          f"LIKE '%2021%'"))
+            df2022rank = pd.DataFrame(self.cursor.execute(f"SELECT show_title,season_title,MAX(cumulative_weeks_in_top_10),"
+                                                          f"week,genres FROM rankByCountry LEFT JOIN genreInfo ON "
+                                                          f"rankByCountry.show_title = genreInfo.title WHERE "
+                                                          f"country_name "
+                                                          f"= '{self.country.get()}' AND category {category} AND week "
+                                                          f"LIKE '%2022%' GROUP BY show_title"))
+            x = df2022rank[4]
+            df2022rank[4] = df2022rank[4].apply(lambda key: 1 if self.genre.get().lower() in key else 0)
+            y = -1
         except TypeError as TErr:
             print(TErr)
         except sqlite3.DatabaseError as DBErr:
@@ -213,10 +235,10 @@ class BuildGUI:
             for x in vals:
                 s = x.replace('[', '').replace(']', '').replace('\'', '').split(',')
                 for y in s:
-                    if y.strip() != 'none':
+                    if y.lower().strip() != 'none':
                         genreSet.add(y.strip().capitalize())
             # genreSet = set(itertools.chain(vals))  # test this https://datagy.io/python-flatten-list-of-lists/
-            self.genreCBox['values'] = list(genreSet)
+            self.genreCBox['values'] = sorted(list(genreSet))
             self.exitMenu.add_command(label="Exit", command=exit)
             # add elements to the root window
             self.countryCBox.pack()
@@ -260,7 +282,8 @@ def manualUpdates():
     cursor = con.cursor()
     try:
         df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo WHERE genres = 'none' ORDER BY title"))
-        Logger.createManualUpdateList(df)
+        if df.values.size > 0:
+            Logger.createManualUpdateList(df)
     except sqlite3.DatabaseError as DErr:
         Logger.log(DErr)
     finally:
@@ -285,7 +308,8 @@ def initialize() -> None:
                        UNIQUE (week,category,weekly_rank,show_title,season_title,weekly_hours_viewed,cumulative_weeks_in_top_10));
                        CREATE TABLE IF NOT EXISTS mostPopular(category,rank,show_title,season_title,hours_viewed_first_28_days,
                        UNIQUE (category,rank,show_title,season_title,hours_viewed_first_28_days));
-                       CREATE TABLE IF NOT EXISTS genreInfo(title, genres);
+                       CREATE TABLE IF NOT EXISTS genreInfo(title, genres,
+                       UNIQUE (title, genres));
                        COMMIT;""")
         except sqlite3.DatabaseError as dbErr2:
             print(dbErr2)

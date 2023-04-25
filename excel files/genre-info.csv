@@ -11,7 +11,7 @@ title,genres
 12 Strong,"['action', 'drama', 'history', 'war']"
 13 Going on 30,"['comedy', 'fantasy', 'romance']"
 13 Hours that Saved Britain,"['documentary', 'history', 'war']"
-13 Hours: The Secret Soldiers of Benghazi,none
+13 Hours: The Secret Soldiers of Benghazi,"['action', 'drama', 'history']"
 13 Minutes,"['action', 'drama', 'thriller']"
 13: Game of Death,"['comedy', 'crime', 'drama', 'horror', 'mystery', 'thriller']"
 14 Peaks: Nothing Is Impossible,"['documentary', 'adventure', 'sport']"
@@ -132,7 +132,7 @@ Absolute Power,"['short', 'drama']"
 Abyss,"['crime', 'fantasy', 'romance']"
 Ace Ventura: Pet Detective,['comedy']
 Ace Ventura: When Nature Calls,"['adventure', 'comedy', 'crime']"
-Ace of Diamond,none
+Ace of Diamond,"['animation', 'sport']"
 Ackley Bridge,"['drama', 'romance']"
 Acrimony,"['horror', 'romance', 'thriller']"
 Act of Valor,"['action', 'adventure', 'thriller', 'war']"
@@ -221,7 +221,7 @@ Ankahi Kahaniya,"['drama', 'romance']"
 Anna,"['action', 'thriller']"
 Annaatthe,"['action', 'comedy', 'drama']"
 Annaatthe (Hindi),"['action', 'comedy', 'drama']"
-Annaatthe (Telugu),none
+Annaatthe (Telugu),"['action', 'comedy', 'drama']"
 Annabelle Comes Home,"['horror', 'mystery', 'thriller']"
 Annabelle: Creation,"['horror', 'mystery', 'thriller']"
 Anne+: The Film,"['comedy', 'drama', 'romance']"
@@ -419,7 +419,7 @@ Blue Story,"['crime', 'drama', 'musical']"
 Blue Streak,"['action', 'comedy', 'crime', 'thriller']"
 "Blue, Painful, Fragile","['adventure', 'drama']"
 Blumhouse's Fantasy Island,"['fantasy', 'horror', 'mystery']"
-Blumhouse's Truth or Dare: Extended Director's Cut,none
+Blumhouse's Truth or Dare: Extended Director's Cut,"['horror', 'thriller']"
 "Bob Ross: Happy Accidents, Betrayal & Greed",['documentary']
 Body Cam,"['action', 'adventure', 'crime', 'horror', 'mystery', 'thriller']"
 Body of Lies,"['action', 'drama', 'thriller']"
@@ -431,7 +431,7 @@ Bon Bini Holland 2,"['action', 'comedy', 'crime']"
 Bonus Family,"['comedy', 'drama']"
 "Boo, Bitch","['comedy', 'drama', 'fantasy']"
 Boomika,['horror']
-Boomika (Hindi),none
+Boomika (Hindi),"['horror']"
 Bordertown,"['crime', 'drama', 'mystery']"
 Bordertown: The Mural Murders,"['crime', 'drama', 'mystery']"
 Borgen,['drama']
@@ -621,8 +621,8 @@ Crayon Shin-chan the Movie: My Moving Story Cactus Attack,"['animation', 'action
 Crayon Shin-chan the Movie: Roar! Kasukabe Animal Kingdom,['animation']
 Crayon Shin-chan the Movie: Shrouded in Mystery! The Flowers of Tenkasu Academy,"['animation', 'action', 'adventure', 'comedy', 'mystery']"
 Crayon Shin-chan the Movie: The Legend Called: Dance! Amigo!,"['animation', 'comedy', 'horror', 'sci-fi']"
-Crayon Shin-chan the Movie: The Storm Called: Operation Golden Spy,none
-Crayon Shin-chan the Movie: Very Tasty! B-class Gourmet Survival!!,none
+Crayon Shin-chan the Movie: The Storm Called: Operation Golden Spy,"['animation', 'comedy']"
+Crayon Shin-chan the Movie: Very Tasty! B-class Gourmet Survival!!,"['animation', 'comedy']"
 Crazy Rich Asians,"['comedy', 'drama', 'romance']"
 "Crazy, Stupid, Love.","['comedy', 'drama', 'romance']"
 Cream,"['short', 'drama']"
@@ -735,7 +735,7 @@ Diva,"['drama', 'mystery', 'thriller']"
 Dive Club,"['adventure', 'drama', 'family', 'mystery']"
 Divergent,"['comedy', 'drama']"
 Django Unchained,"['drama', 'western']"
-Doctor (Tamil),none
+Doctor (Tamil),"['action', 'comedy']"
 Doctor (Telugu),['talk-show']
 Doctor John,"['drama', 'mystery', 'romance']"
 Doctor Prisoner,"['drama', 'mystery', 'thriller']"
@@ -751,7 +751,7 @@ Don't Let Go,"['drama', 'horror', 'mystery', 'sci-fi', 'thriller']"
 Don't Look Up,"['comedy', 'drama', 'sci-fi']"
 Don’t Blame Karma!,"['comedy', 'romance']"
 Doom of Love,"['drama', 'romance']"
-Doomed Marriage,none
+Doomed Marriage,"['documentary', 'drama']"
 Doomsday,"['action', 'sci-fi']"
 Dora and the Lost City of Gold,"['action', 'adventure', 'comedy', 'family', 'fantasy', 'horror', 'mystery']"
 Double Jeopardy,"['crime', 'drama', 'mystery', 'thriller']"
@@ -1049,7 +1049,7 @@ Grumpy Christmas,['comedy']
 Guardian: The Lonely and Great God,"['comedy', 'drama', 'fantasy', 'romance']"
 Guest House,['comedy']
 Guimoon: The Lightless Door,"['horror', 'mystery', 'thriller']"
-Gump – The Dog Who Taught People How to Live,none
+Gump – The Dog Who Taught People How to Live,"['adventure', 'family']"
 Gunjan Saxena: The Kargil Girl,"['action', 'biography', 'drama', 'war']"
 Gunpowder Milkshake,"['action', 'crime', 'thriller']"
 Guns Akimbo,"['action', 'comedy', 'crime', 'thriller']"
@@ -1060,7 +1060,7 @@ Habibie & Ainun 3,"['biography', 'drama', 'romance']"
 Hachi: A Dog's Tale,"['biography', 'drama', 'family']"
 Hacksaw Ridge,"['biography', 'drama', 'history', 'war']"
 Hail the Judge,['comedy']
-"Hail, Driver!",none
+"Hail, Driver!","['drama']"
 Hairspray,"['comedy', 'drama', 'musical', 'romance']"
 Halftime,"['documentary', 'biography', 'music']"
 Halloween,"['crime', 'horror', 'thriller']"
@@ -1174,11 +1174,11 @@ How I Became a Superhero,"['documentary', 'adventure', 'family']"
 How I Fell in Love with a Gangster,"['crime', 'drama']"
 How It Ends,"['comedy', 'drama']"
 How To Build a Sex Room,['reality-tv']
-How the Grinch Stole Christmas,none
+How the Grinch Stole Christmas,"['comedy', 'family', 'fantasy']"
 How to Be Single,"['comedy', 'drama', 'romance']"
 How to Be a Latin Lover,"['comedy', 'drama']"
 How to Become a Tyrant,"['documentary', 'biography', 'history', 'war']"
-How to Become the Worst Student at School,none
+How to Become the Worst Student at School,"['comedy']"
 How to Build a Girl,['comedy']
 How to Change Your Mind,['documentary']
 How to Eliminate My Teacher,"['mystery', 'thriller']"
@@ -1215,8 +1215,8 @@ I Saw the Devil,"['short', 'drama']"
 I See Dead People,"['short', 'comedy', 'drama']"
 I See You,"['crime', 'drama', 'mystery', 'thriller']"
 I Still Believe,"['biography', 'drama', 'music', 'romance']"
-I Swear It Wasn't Me,none
-I am Solo,none
+I Swear It Wasn't Me,"['romance']"
+I am Solo,"['game-show', 'reality-tv', 'romance']"
 I missed you: Director's Cut,['romance']
 "I'm Drunk, I Love You",['romance']
 I'm Glad I Did,['documentary']
@@ -1262,7 +1262,7 @@ Inspector Koo,"['comedy', 'drama', 'history', 'mystery']"
 Instant Dream Home,['reality-tv']
 Instant Family,"['comedy', 'drama']"
 Interceptor,"['action', 'adventure', 'drama', 'thriller']"
-Intersection,none
+Intersection,"['drama']"
 Interstellar,"['short', 'music']"
 Intervenção,"['short', 'drama']"
 Intimacy,"['drama', 'romance']"
@@ -1545,7 +1545,7 @@ Love & Other Drugs,"['comedy', 'drama']"
 Love (ft. Marriage and Divorce),"['drama', 'romance']"
 Love 101,"['comedy', 'drama', 'romance']"
 Love Actually,"['comedy', 'drama', 'romance']"
-Love After Divorce,none
+Love After Divorce,"['game-show', 'reality-tv', 'romance']"
 Love Again,"['comedy', 'drama', 'romance']"
 Love Destiny,"['drama', 'fantasy', 'history', 'romance']"
 Love Don't Cost a Thing,"['comedy', 'romance', 'drama']"
@@ -1612,14 +1612,14 @@ Madagascar: Escape 2 Africa,"['animation', 'adventure', 'comedy', 'family']"
 Made in Italy,"['comedy', 'drama', 'romance']"
 Mafia Inc.,"['crime', 'thriller']"
 Maha Samudram,"['action', 'drama', 'romance']"
-Maha Samudram (Tamil),none
-Mahjong Legend Akagi: The Genius Who Descended Into the Darkness,none
+Maha Samudram (Tamil),"['action', 'drama', 'romance']"
+Mahjong Legend Akagi: The Genius Who Descended Into the Darkness,"['animation', 'sport', 'thriller']"
 Mai: A Mother's Rage,"['crime', 'drama', 'thriller']"
 Maid,['drama']
 Maid in Manhattan,"['comedy', 'drama', 'romance']"
 Major (Hindi),"['adventure', 'war', 'western']"
 Major (Malayalam),"['game-show', 'reality-tv']"
-Major (Telugu),none
+Major (Telugu),"['action', 'biography', 'drama']"
 Major Grom: Plague Doctor,"['action', 'crime']"
 Major Payne,"['adventure', 'comedy', 'family']"
 Making Fun,['reality-tv']
@@ -1660,7 +1660,7 @@ Matilda,['short']
 Maverix,"['drama', 'family', 'sport']"
 Mawlana: The Preacher,"['short', 'western']"
 Maya and the Three,"['animation', 'action', 'adventure', 'comedy', 'drama', 'family', 'fantasy']"
-Me Against You: Mr. S's Vendetta,none
+Me Against You: Mr. S's Vendetta,"['comedy']"
 Me Always You,"['comedy', 'romance']"
 Me Before You,['drama']
 Mean Girls,"['short', 'drama']"
@@ -1681,7 +1681,7 @@ Memories of a Murderer: The Nilsen Tapes,"['documentary', 'biography', 'crime', 
 Men in Black 3,"['action', 'adventure', 'comedy', 'sci-fi']"
 Men in Black II,"['action', 'adventure', 'comedy', 'mystery', 'sci-fi']"
 Men in Black: International,"['action', 'adventure', 'comedy', 'sci-fi']"
-Men on a Mission,none
+Men on a Mission,"['comedy', 'game-show', 'reality-tv']"
 Mentés másképp,"['comedy', 'drama']"
 Mercury Rising,"['animation', 'short']"
 Merlí. Sapere Aude,"['comedy', 'drama']"
@@ -1776,7 +1776,7 @@ Munich – The Edge of War,"['biography', 'drama', 'history', 'thriller']"
 Murder Mystery,"['action', 'comedy', 'crime', 'mystery', 'romance']"
 Murder by Numbers,"['documentary', 'crime']"
 Murder by the Coast,"['documentary', 'crime', 'history', 'mystery']"
-Murders at the House of Death,none
+Murders at the House of Death,"['mystery', 'crime', 'horror', 'thriller']"
 Mushoku Tensei: Jobless Reincarnation,"['animation', 'action', 'adventure', 'drama', 'fantasy']"
 Musudan,"['action', 'mystery', 'thriller']"
 My Amanda,"['drama', 'romance']"
@@ -1829,7 +1829,7 @@ Navarasa,['drama']
 Nawara,['drama']
 Never Back Down,['documentary']
 Never Back Down 3,"['action', 'crime', 'drama']"
-Never Give Up,none
+Never Give Up,"['comedy', 'drama', 'romance']"
 Never Grow Old,"['drama', 'western']"
 Never Have I Ever,"['comedy', 'drama']"
 Never Look Away,"['biography', 'drama', 'romance', 'thriller', 'war']"
@@ -1902,7 +1902,7 @@ Old,"['drama', 'horror', 'mystery', 'thriller']"
 Old Henry,"['action', 'drama', 'western']"
 Old People's Home for 4 Year Olds,['documentary']
 Old School,"['short', 'drama']"
-Oldboy,none
+Oldboy,"['action', 'drama', 'mystery']"
 Omo Ghetto: the Saga,"['action', 'adventure', 'comedy', 'drama']"
 On My Block,"['comedy', 'drama']"
 On The Wings of Love,"['comedy', 'drama', 'romance']"
@@ -1988,7 +1988,7 @@ Patriots Day,"['action', 'crime', 'drama', 'history', 'thriller']"
 Pattaya,['comedy']
 Paul,"['adventure', 'comedy', 'sci-fi']"
 Paul Blart: Mall Cop,"['action', 'comedy', 'crime', 'family']"
-Paul Blart: Mall Cop 2,none
+Paul Blart: Mall Cop 2,"['action', 'comedy', 'crime']"
 Paw Patrol: The Movie,"['animation', 'action', 'adventure', 'comedy', 'drama', 'family', 'fantasy', 'sci-fi']"
 Payback,"['drama', 'thriller']"
 Peaky Blinders,"['crime', 'drama']"
@@ -2011,13 +2011,13 @@ Peter Rabbit 2,"['adventure', 'comedy', 'crime', 'drama', 'family', 'fantasy']"
 Phoenix,['short']
 Photocopier,"['crime', 'drama', 'mystery', 'thriller']"
 Photocopy,['drama']
-Phu Bao Thai Bahn E-Saan Juad,none
+Phu Bao Thai Bahn E-Saan Juad,"['comedy', 'romance']"
 Piggy Back,['short']
 Pink,"['crime', 'drama', 'thriller']"
 Pinocchio,"['comedy', 'drama', 'mystery', 'romance', 'thriller']"
 Piranha,"['short', 'action', 'drama', 'music']"
 Pirate Gold of Adak Island,"['adventure', 'reality-tv']"
-Pitbull Public Orders,none
+Pitbull Public Orders,"['action', 'crime', 'drama', 'mystery', 'thriller']"
 Pitch Perfect 3,"['comedy', 'music']"
 Pixie,"['comedy', 'crime', 'thriller']"
 Playing with Fire,"['action', 'crime', 'drama', 'thriller']"
@@ -2082,7 +2082,7 @@ RRR (Hindi),['drama']
 RV: Resurrected Victims,"['action', 'mystery', 'thriller']"
 Rabbids Invasion Special: Mission to Mars,"['animation', 'comedy', 'family']"
 Racket Boys,"['comedy', 'drama', 'sport']"
-Radhe Shyam (Hindi),none
+Radhe Shyam (Hindi),"['drama', 'romance']"
 Radio,"['biography', 'drama', 'sport']"
 Rain or Shine,"['animation', 'short']"
 Raising Dion,"['drama', 'sci-fi']"
@@ -2091,7 +2091,7 @@ Rambo: Last Blood,"['action', 'crime', 'thriller']"
 Rampage,"['action', 'adventure', 'sci-fi']"
 Ransom,['short']
 Ranveer vs Wild with Bear Grylls,['documentary']
-Rascals on Duty,none
+Rascals on Duty,"['comedy']"
 RattleSnake - The Ahanna Story,['drama']
 Raw (Hindi),['drama']
 Ray,"['crime', 'drama', 'thriller']"
@@ -2133,7 +2133,7 @@ Resort to Love,"['comedy', 'romance']"
 Restless,"['action', 'crime', 'thriller']"
 Resurrection: Ertugrul,"['action', 'adventure', 'drama', 'history', 'war']"
 Retfærdighedens ryttere,"['action', 'comedy', 'drama']"
-Rettou Seiha (Tentative),none
+Rettou Seiha (Tentative),"['action', 'adventure']"
 Return to Space,['documentary']
 Revenge,"['action', 'drama', 'horror', 'thriller']"
 Revolver,['comedy']
@@ -2178,7 +2178,7 @@ Running Wild,"['drama', 'western']"
 Rurouni Kenshin: Kyoto Inferno,"['action', 'adventure', 'drama', 'fantasy']"
 Rurouni Kenshin: Origins,"['action', 'adventure', 'drama', 'history', 'war']"
 Rurouni Kenshin: The Beginning,"['action', 'adventure', 'drama', 'history', 'romance']"
-Rurouni Kenshin: The Final,none
+Rurouni Kenshin: The Final,"['action', 'adventure', 'drama']"
 Rurouni Kenshin: The Legend Ends,"['action', 'adventure', 'drama', 'fantasy']"
 Rush Hour,['documentary']
 Rush Hour 2,"['action', 'comedy', 'crime', 'thriller']"
@@ -2194,7 +2194,7 @@ SHAMAN KING,"['animation', 'action', 'adventure', 'comedy', 'fantasy']"
 SKY Castle,"['drama', 'mystery']"
 SLR,"['horror', 'thriller']"
 SP: The Motion Picture Episode V,['drama']
-SP: The Motion Picture Episode VI<The Final Episode>,none
+SP: The Motion Picture Episode VI<The Final Episode>,"['drama']"
 SPRIGGAN,"['animation', 'action', 'adventure', 'sci-fi']"
 SPY x FAMILY,"['animation', 'action', 'comedy']"
 STAND BY ME Doraemon,"['animation', 'comedy', 'drama', 'family', 'sci-fi']"
@@ -2204,7 +2204,7 @@ Saaho,"['action', 'thriller']"
 Sabotage,"['short', 'action']"
 Safe,"['action', 'crime', 'thriller']"
 Safe House,['drama']
-Sahara,none
+Sahara,"['animation', 'adventure', 'comedy']"
 Salma's Home,['drama']
 Salt,"['short', 'drama']"
 Same Kind of Different as Me,"['biography', 'drama']"
@@ -2240,7 +2240,7 @@ Secrets of Summer,"['drama', 'family']"
 Security,['thriller']
 See for Me,"['crime', 'drama', 'mystery', 'thriller']"
 Seeking Justice,"['short', 'comedy']"
-Seiji Oda,none
+Seiji Oda,"['action', 'adventure']"
 Seinfeld,['comedy']
 Seized,"['short', 'sci-fi']"
 Sekigahara,"['drama', 'history', 'war']"
@@ -2253,7 +2253,7 @@ Senior Year,"['comedy', 'drama']"
 Senzo: Murder of a Soccer Star,"['documentary', 'crime', 'mystery', 'sport']"
 Seobok,"['action', 'sci-fi', 'thriller']"
 Serenity,['short']
-Serial Cook,none
+Serial Cook,"['comedy', 'crime', 'drama']"
 Servant of the People,['comedy']
 Seventh Son,"['action', 'adventure', 'fantasy']"
 Sex Education,"['comedy', 'drama']"
@@ -2425,7 +2425,7 @@ Stuck Together,['comedy']
 Suicide Squad,"['action', 'adventure', 'fantasy', 'sci-fi']"
 Suits,"['comedy', 'drama']"
 Sully,"['biography', 'drama']"
-"Sultan Agung: Throne, Rebellion, and Love",none
+"Sultan Agung: Throne, Rebellion, and Love","['action', 'drama', 'history']"
 Summer Heat,"['drama', 'romance']"
 Summer Wars,"['animation', 'action', 'adventure', 'comedy', 'drama', 'romance', 'sci-fi']"
 Summer of '92,"['biography', 'comedy', 'drama', 'history', 'sport']"
@@ -2475,11 +2475,11 @@ Tall Girl,"['comedy', 'drama', 'family', 'romance']"
 Tall Girl 2,"['comedy', 'drama', 'family', 'romance']"
 Talladega Nights: The Ballad of Ricky Bobby,"['comedy', 'sport']"
 Tammy,"['short', 'comedy']"
-Tangisan Akinabalu,none
+Tangisan Akinabalu,"['drama']"
 Tanwa Savage,"['comedy', 'drama']"
 Target Number One,"['action', 'thriller']"
 Taxi 5,"['action', 'comedy', 'crime']"
-Taxi Driver,none
+Taxi Driver,"['action', 'crime', 'drama']"
 Tear Along the Dotted Line,"['animation', 'comedy', 'drama']"
 Tears of the Sun,"['action', 'drama', 'thriller', 'war']"
 Ted,['comedy']
@@ -2495,7 +2495,7 @@ Ten Years,['drama']
 Tenant of the House,['drama']
 Tenet,"['action', 'sci-fi', 'thriller']"
 Term Life,"['action', 'crime', 'drama', 'thriller']"
-Terminator 2: Judgment Day,"['short', 'comedy']"
+Terminator 2: Judgment Day,"['action', 'sci-fi']"
 Terminator Genisys,"['action', 'adventure', 'sci-fi', 'thriller']"
 Terminator Salvation,"['action', 'adventure', 'sci-fi']"
 Terminator: Dark Fate,"['action', 'adventure', 'sci-fi']"
@@ -2595,7 +2595,7 @@ The Camp,['comedy']
 The Cave,"['action', 'adventure', 'drama', 'thriller']"
 The Chair,"['comedy', 'drama']"
 The Change-Up,"['comedy', 'fantasy']"
-The Chaos Class Goes to Cyprus: Summer Games,none
+The Chaos Class Goes to Cyprus: Summer Games,"['comedy']"
 The Chestnut Man,"['crime', 'drama', 'mystery', 'thriller']"
 The Choice,"['short', 'action', 'adventure', 'thriller']"
 The Christmas Chronicles,"['adventure', 'comedy', 'family', 'fantasy']"
@@ -2701,7 +2701,7 @@ The General's Daughter,"['crime', 'drama', 'mystery', 'thriller']"
 The Gentlemen,"['action', 'comedy', 'crime']"
 The Gentlemen's League,['comedy']
 The Getaway King,"['action', 'comedy', 'crime']"
-The Ghost and the Tout,none
+The Ghost and the Tout,"['comedy', 'fantasy']"
 The Ghost and the Tout Too,"['comedy', 'fantasy']"
 The Gift,"['drama', 'fantasy', 'mystery', 'romance']"
 The Girl Next Door,"['documentary', 'short']"
@@ -2765,12 +2765,12 @@ The House Next Door: Meet the Blacks 2,"['action', 'comedy', 'horror']"
 The House of Flowers: The Movie,"['comedy', 'drama']"
 The House of the Spirits,"['drama', 'romance']"
 The House with a Clock in Its Walls,"['comedy', 'family', 'fantasy', 'mystery', 'sci-fi']"
-The Humans and the Mongoose,none
+The Humans and the Mongoose,"['comedy', 'fantasy', 'horror']"
 The Hunger Games,"['action', 'adventure', 'sci-fi', 'thriller']"
 The Hunger Games: Catching Fire,"['action', 'adventure', 'sci-fi', 'thriller']"
 The Hunger Games: Mockingjay - Part 1,"['action', 'adventure', 'sci-fi', 'thriller']"
 The Hunger Games: Mockingjay - Part 2,"['action', 'adventure', 'sci-fi', 'thriller']"
-The Hungry and the Hairy,none
+The Hungry and the Hairy,"['reality-tv']"
 The Hunt,['horror']
 The Hunt for Red October,"['action', 'adventure', 'thriller']"
 The Huntsman: Winter's War,"['action', 'adventure', 'drama', 'fantasy']"
@@ -2794,7 +2794,7 @@ The Invasion,"['sci-fi', 'thriller']"
 The Invisible Man,"['drama', 'horror', 'mystery', 'sci-fi', 'thriller']"
 The Invisible Thread,"['comedy', 'drama', 'family']"
 The Irishman,"['biography', 'crime', 'drama']"
-The Iron Squad,none
+The Iron Squad,"['action', 'reality-tv']"
 The Island,"['comedy', 'drama']"
 The Italian Job,"['action', 'crime', 'thriller']"
 The Jackal,['short']
@@ -2906,7 +2906,7 @@ The Next Karate Kid,"['action', 'drama', 'family', 'romance', 'sport']"
 The Next Three Days,"['action', 'crime', 'drama', 'romance', 'thriller']"
 The Nice Guys,"['action', 'comedy', 'crime', 'thriller']"
 The Night Before,['horror']
-The Night Beyond the Tricornered Window,none
+The Night Beyond the Tricornered Window,"['action', 'fantasy', 'mystery']"
 The Nightingale,"['adventure', 'drama', 'thriller']"
 The Ninth Gate,"['mystery', 'thriller']"
 The Notebook,"['short', 'horror']"
@@ -2953,7 +2953,7 @@ The Pond,"['drama', 'horror', 'mystery']"
 The Possession of Hannah Grace,"['horror', 'mystery', 'thriller']"
 The Postcard Killings,"['crime', 'drama', 'mystery', 'thriller']"
 The Power of the Dog,"['drama', 'romance', 'western']"
-The Precious memory of Gogo Brothers,none
+The Precious memory of Gogo Brothers,"['animation']"
 The Prince & Me,"['comedy', 'family', 'romance']"
 The Princess Switch 3: Romancing the Star,"['comedy', 'drama', 'family', 'romance']"
 The Prison,"['action', 'crime']"
@@ -3115,7 +3115,7 @@ The Wolf of Wall Street,"['biography', 'comedy', 'crime', 'drama']"
 The Wolf's Call,"['action', 'thriller']"
 The Woman in the House Across the Street from the Girl in the Window,"['comedy', 'crime', 'drama', 'mystery', 'thriller']"
 The Women,"['comedy', 'drama']"
-The Women and the Murderer,none
+The Women and the Murderer,"['documentary', 'crime']"
 The World Between Us,"['drama', 'romance']"
 The World of the Married,"['drama', 'romance']"
 The World's Most Amazing Vacation Rentals,['reality-tv']
@@ -3275,7 +3275,7 @@ Us,"['horror', 'mystery', 'thriller']"
 Ushio & Tora,"['animation', 'action', 'comedy', 'fantasy']"
 Utopía,['comedy']
 VINLAND SAGA,"['animation', 'action', 'adventure', 'drama', 'history']"
-Vaashi (Malayalam),none
+Vaashi (Malayalam),"['drama', 'thriller']"
 Vacation,"['short', 'drama']"
 Vagabond,"['action', 'mystery', 'thriller']"
 Valentina's Wedding,"['comedy', 'drama', 'romance']"
@@ -3303,7 +3303,7 @@ Villains,"['comedy', 'drama', 'horror', 'thriller']"
 Vincenzo,"['action', 'comedy', 'crime', 'drama']"
 Violet Evergarden the Movie,"['animation', 'drama', 'fantasy', 'romance']"
 Virata Parvam,"['action', 'drama']"
-Virata Parvam (Tamil),none
+Virata Parvam (Tamil),"['action', 'drama']"
 Virgin River,"['drama', 'romance']"
 Vivo,"['animation', 'adventure', 'comedy', 'drama', 'family', 'musical']"
 Vlad the Impaler,"['action', 'history', 'war']"
@@ -3350,7 +3350,7 @@ What's Your Number?,"['short', 'comedy', 'romance']"
 When Missing Turns to Murder,"['documentary', 'crime']"
 When My Love Blooms,"['drama', 'romance']"
 When We are Born,"['short', 'music']"
-When the Bough Breaks,none
+When the Bough Breaks,"['drama', 'thriller']"
 Where is Marta?,"['documentary', 'crime', 'mystery']"
 While You Were Sleeping,"['comedy', 'drama', 'fantasy', 'romance', 'thriller']"
 Whindersson Nunes: My Own Show!,"['documentary', 'comedy']"
@@ -3452,10 +3452,10 @@ xXx: The Return of Xander Cage,"['action', 'adventure', 'thriller']"
 É Fada!,"['comedy', 'family', 'fantasy']"
 Érase una vez en Euskadi,['drama']
 Şahane Hayaller,['comedy']
-أصحاب ...ولا أعزّ,none
+أصحاب ...ولا أعزّ,"['comedy', 'drama']"
 الناموس,"['drama', 'history']"
-بلال: بطل من فصيل جديد,none
-حكايات بنات الجزء ١,none
+"['animation', 'action', 'adventure']"
+حكايات بنات الجزء ١,"['drama', 'family']"
 راس السنة,['drama']
-صاحب المقام,none
-레드슈즈,none
+صاحب المقام,"['comedy', 'drama']"
+레드슈즈,"['animation', 'action', 'adventure']"
