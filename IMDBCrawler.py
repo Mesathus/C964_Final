@@ -1,8 +1,9 @@
 import re
+
+import extruct
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from w3lib.url import url_query_cleaner
-import extruct
 
 
 def process_links(links):

@@ -4,3 +4,5 @@
 /netflix.db-journal
 /logs/
 /Manual Updates/
+/confusion_matrix.png
+/IMDBCrawler.py

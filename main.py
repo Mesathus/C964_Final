@@ -7,12 +7,20 @@ from multipledispatch import dispatch
 import matplotlib as mpl
 import datetime
 from timeit import default_timer
+
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+from PIL import Image
 import Logger
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from statsmodels.formula.api import ols
 import sklearn as skl
+from sklearn import linear_model
+from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
+import scikitplot as skplot
+import seaborn as sns
 import sys
 import csv
 import sqlite3
@@ -184,6 +192,7 @@ class BuildGUI:
                                         offvalue=False)
         self.chkTV = ttk.Checkbutton(master=self.chkFrame, text="TV Series", variable=self.tvShows, onvalue=True,
                                      offvalue=False)
+        self.recommendLabel = ttk.Label(self.root)
         self.imdbGUI()
 
     def recommender(self):
@@ -193,25 +202,94 @@ class BuildGUI:
             print(self.country.get(), self.genre.get(), self.movies.get(), self.tvShows.get())
             category = " IS NULL " if not self.tvShows.get() and not self.movies.get() else " LIKE '%' " \
                 if self.tvShows.get() and self.movies.get() else " = 'TV' " if self.tvShows.get() else " = 'Films' "
+            # query to match genre/country/category by all years
             query = f"SELECT * FROM rankByCountry LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title " \
-                    f"WHERE genres LIKE '%{self.genre.get().lower()}%' AND country" \
-                    f"_name = '{self.country.get()}' AND category {category} "
+                    f"WHERE genres LIKE '%{self.genre.get().lower()}%' " \
+                    f"AND country_name = '{self.country.get()}' " \
+                    f"AND category {category} "
             df = pd.DataFrame(self.cursor.execute(query))
-            df2021rank = pd.DataFrame(self.cursor.execute(f"SELECT show_title,season_title,cumulative_weeks_in_top_10,"
-                                                          f"week,genres FROM rankByCountry LEFT JOIN genreInfo ON "
-                                                          f"rankByCountry.show_title = genreInfo.title WHERE "
-                                                          f"genres LIKE '%{self.genre.get().lower()}%' AND country_name "
-                                                          f"= '{self.country.get()}' AND category {category} AND week "
-                                                          f"LIKE '%2021%'"))
-            df2022rank = pd.DataFrame(self.cursor.execute(f"SELECT show_title,season_title,MAX(cumulative_weeks_in_top_10),"
-                                                          f"week,genres FROM rankByCountry LEFT JOIN genreInfo ON "
-                                                          f"rankByCountry.show_title = genreInfo.title WHERE "
-                                                          f"country_name "
-                                                          f"= '{self.country.get()}' AND category {category} AND week "
-                                                          f"LIKE '%2022%' GROUP BY show_title"))
-            x = df2022rank[4]
-            df2022rank[4] = df2022rank[4].apply(lambda key: 1 if self.genre.get().lower() in key else 0)
-            y = -1
+            df2021rank = pd.DataFrame(self.cursor.execute(f"SELECT show_title,season_title,MAX(cumulative_weeks_in_top_10),week,genres "
+                                                          f"FROM rankByCountry "
+                                                          f"LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
+                                                          f"WHERE country_name = '{self.country.get()}' "
+                                                          f"AND category {category} "
+                                                          # f"AND week LIKE '%2021%'"
+                                                          f"GROUP BY show_title"))
+            df2022rank = pd.DataFrame(self.cursor.execute(f"SELECT show_title,season_title,MAX(cumulative_weeks_in_top_10),week,genres "
+                                                          f"FROM rankByCountry "
+                                                          f"LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
+                                                          f"WHERE category {category} "
+                                                          # f"AND week LIKE '%2022%'"
+                                                          f"GROUP BY show_title"))
+            cumWeeks = df2021rank[2].apply(lambda key: int(key)).to_numpy()  # get an array of cumulative weeks column for later
+            #  TODO clean up
+            # transform genres to binary to match search criteria
+            df2021rank[4] = df2021rank[4].apply(lambda key: 1 if self.genre.get().lower() in key else 0)  # 4 = genre column
+            df2021rank[2] = df2021rank[2].apply(lambda key: 1 if int(key) > 1 else 0)  # 2 = MAX aggregate column
+            model = linear_model.LogisticRegression()
+            x = df2021rank[4].to_numpy().reshape(-1, 1)
+            y = df2021rank[2].to_numpy()
+            model.fit(x, y)
+            # print(f"slope: {model.coef_}")
+            # print(f"intercept: {model.intercept_}")
+            r_sq = model.score(x, y)
+            # print(f"coefficient of determination: {r_sq}")
+            # x = df2021rank[4].to_numpy().reshape(-1, 1)  # was 2 = genre
+            # y = df2021rank[2]                   # was 1 = MAX
+            # x = pd.get_dummies(x, drop_first=True)
+            # y = pd.get_dummies(y, drop_first=True)
+            X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=5, stratify=y)
+            scaler = preprocessing.StandardScaler().fit(X_train)  # error here
+            X_train_scaled = scaler.transform(X_train)
+            model.fit(X_train_scaled, y_train)   # model.fit(X_train_scaled, y_train)
+            train_acc = model.score(X_train_scaled, y_train)  # train_acc = model.score(X_train_scaled, y_train)
+            print(f"slope: {model.coef_}")
+            print(f"intercept: {model.intercept_}")
+            print(f"coefficient of determination: {r_sq}")
+            print("The Accuracy for Training Set is {}%".format(round(train_acc * 100, 3)))
+            X_test_scaled = scaler.transform(X_test)
+            y_pred = model.predict(X_test_scaled)  # y_pred = model.predict(X_test_scaled)
+            test_acc = accuracy_score(y_test, y_pred)
+            print("The Accuracy for Test Set is {}%".format(round(test_acc * 100, 3)))
+            print(classification_report(y_test, y_pred))
+            # setting up confusion matrix
+            cm = confusion_matrix(y_test, y_pred)  # showing 2 categories
+            mpl.pyplot.figure(figsize=(12, 6))
+            mpl.pyplot.title("Confusion Matrix")
+            sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+            mpl.pyplot.ylabel("Actual Values")
+            mpl.pyplot.xlabel("Predicted Values")
+            mpl.pyplot.savefig('confusion_matrix.png')
+            mpl.pyplot.show()
+            # setting up ROC
+            y_pred = model.predict_proba(X_test_scaled)
+            skplot.metrics.plot_roc(y_test, y_pred)
+            mpl.pyplot.savefig('roc.png')
+            mpl.pyplot.show()
+            # setting up histogram
+            # mpl.pyplot.style.use('_mpl-gallery')
+            fig, ax = mpl.pyplot.subplots()
+            ax.hist(cumWeeks, bins=cumWeeks.max(), linewidth=0.5, edgecolor="white")
+            ax.set(xlim=(0, cumWeeks.max()), xticks=numpy.arange(1, cumWeeks.max()),
+                   ylim=(0, len(cumWeeks)), yticks=numpy.linspace(0, len(cumWeeks), 9))
+            mpl.pyplot.ylabel("Instances of weekly ranking")
+            mpl.pyplot.xlabel("Consecutive weeks in top 10")
+            mpl.pyplot.savefig('histogram.png')
+            mpl.pyplot.show()
+            # TODO add an output with a recommendation here based on accuracy score
+            if test_acc > .7:
+                self.recommendLabel.configure(text=f"With a test accuracy of {round(test_acc * 100, 2)}%, there's a strong "
+                                                   f"correlation \nand this project is recommended.")
+            elif test_acc > .5:
+                self.recommendLabel.configure(text=f"With a test accuracy of {round(test_acc * 100, 2)}%, there's a weak "
+                                                   f"correlation.  \nThis project is recommended after more regional research.")
+            else:
+                self.recommendLabel.configure(text=f"With a test accuracy of {round(test_acc * 100, 2)}%, there doesn't "
+                                                   f"appear to be much correlation.  \nThis project isn't recommended.")
+            # ROC receiver operative characteristic curve
+            # pearson residuals
+            # predicted vs actual
+            b = -1
         except TypeError as TErr:
             print(TErr)
         except sqlite3.DatabaseError as DBErr:
@@ -227,17 +305,17 @@ class BuildGUI:
             # assign additional values to GUI
             vals = list(df.to_numpy(dtype=str).flatten())  # to_numpy gives a tuple, flatten before we convert to a list
             self.countryCBox['values'] = vals  # if we don't convert to a list combobox breaks words with spaces to separate rows
-            df = pd.DataFrame(self.cursor.execute("SELECT genres FROM genreInfo;"))
-            vals = list(df.to_numpy(dtype=str).flatten())
-            genreSet = set()
+            df = pd.DataFrame(self.cursor.execute("SELECT * FROM genreInfo;"))
+            vals = list(df[1].to_numpy(dtype=str).flatten())
+            genreSet = set()  # create a set of genres, so we don't add duplicates to the combobox
+            # remove list artifacts from genre strings before adding them to the set
             for x in vals:
                 s = x.replace('[', '').replace(']', '').replace('\'', '').split(',')
                 for y in s:
                     if y.lower().strip() != 'none':
-                        genreSet.add(y.strip().capitalize())
-            # genreSet = set(itertools.chain(vals))  # test this https://datagy.io/python-flatten-list-of-lists/
-            self.genreCBox['values'] = sorted(list(genreSet))
-            self.exitMenu.add_command(label="Exit", command=exit)
+                        genreSet.add(y.strip().capitalize())  # formatting the items in the genre set
+            self.genreCBox['values'] = sorted(list(genreSet))  # sets can't be sorted, so convert back to a list
+            self.exitMenu.add_command(label="Exit", command=self.close)
             # add elements to the root window
             self.countryCBox.pack()
             self.genreCBox.pack()
@@ -245,10 +323,15 @@ class BuildGUI:
             self.chkFrame.pack()
             self.chkMovie.pack()
             self.chkTV.pack()
+            self.recommendLabel.pack()
         except TypeError as TErr:
             print(TErr)
         except sqlite3.DatabaseError as DBErr:
             print(DBErr)
+
+    def close(self):
+        exit()
+        self.root.destroy()  # close the tkinter window without exiting the program
 
     def __del__(self):
         try:
@@ -288,7 +371,7 @@ def manualUpdates():
         cursor.close()
 
 
-def initialize() -> None:
+def initializeDatabase() -> None:
     cursor = con.cursor()
     try:
         cursor.execute("SELECT * FROM rankByCountry")
@@ -334,7 +417,7 @@ def resetDatabase() -> None:
 
 def main():
     # resetDatabase()
-    # initialize()
+    # initializeDatabase()
     cursor = con.cursor()
     root = Tk()
     # results = cursor.execute("SELECT * FROM rankByCountry")
@@ -384,5 +467,6 @@ def main():
 sys.stdout.reconfigure(encoding='utf-8')
 con = sqlite3.connect("netflix.db")
 cg = Cinemagoer()
+
 if __name__ == "__main__":
     main()
