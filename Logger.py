@@ -24,7 +24,6 @@ def createManualUpdateList(showList):
     try:
         basePath = os.getcwd()
         errDate = date.today()
-        errTime = dt.utcnow()
         errPath = os.path.join(basePath, 'Manual Updates')
         if not os.path.exists(errPath):  # make the manual updates directory if it doesn't exist
             os.makedirs(errPath)

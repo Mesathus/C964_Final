@@ -1,21 +1,12 @@
 import numpy
 import pandas as pd
-import itertools
-import webbrowser
 from imdb import Cinemagoer
-from multipledispatch import dispatch
 import matplotlib as mpl
-import datetime
-from timeit import default_timer
-
 from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
-from PIL import Image
 import Logger
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
-from statsmodels.formula.api import ols
-import sklearn as skl
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
@@ -30,7 +21,6 @@ def updateDatabase():
     cursor = con.cursor()
     try:
         # generate the first three databases from csv files
-        # TODO write a function to handle database creation
         with open("excel files/all-weeks-countries.csv", "rt", encoding='utf-8') as allCountries:
             data = csv.DictReader(allCountries)
             countriesInfo = [(i['country_name'], i['country_iso2'], i['week'], i['category'], i['weekly_rank'],
@@ -88,17 +78,6 @@ def updateDatabase():
                     df['genres'] = df.apply((lambda key: genreCrawl(key.title, earliestYear, True)), axis=1)
                     df.to_sql('genreInfo', con, if_exists='append', index=False)
                 earliestYear += 1
-        # print(pd.DataFrame(cursor.execute("SELECT * FROM genreInfo")))
-        # df.drop(columns={'week', "season"}, inplace=True)
-        # print(pd.DataFrame(cursor.execute("SELECT * FROM genreInfo")))
-        args = ['country_name', 'week']  # for creating variable search queries from user selected categories,  not for this module
-        query = f"SELECT {(lambda x: ', '.join(x))(args)} FROM rankByCountry ORDER BY show_title DESC LIMIT 50"
-        # df = pd.DataFrame(cursor.execute(query))
-        # print("\n", df.info)
-        # df.rename(mapper=lambda x: args[x], axis=1, inplace=True)  # using the args list to rename columns
-        # entry1 = df.at[0, 'week'].split('-')
-        # entry2 = df.at[3, 'week'].split('-')
-        # print(entry1, "\n", entry2)
         manualUpdates()
     except sqlite3.DatabaseError as dbErr:
         print(dbErr)
@@ -111,7 +90,7 @@ def updateDatabase():
         cursor.close()
 
 
-def genreCrawl(title, year, season) -> str:  # TODO make this function smarter than selecting the first result
+def genreCrawl(title, year, season) -> str:  # TODO make this function better
     movie = None
     try:
         movieList = cg.search_movie(title.lower())
@@ -196,33 +175,18 @@ class BuildGUI:
         self.imdbGUI()
 
     def recommender(self):
-        # TODO search DB for matching information and run regression
-        # TODO make recommendations based on criteria
         try:
             print(self.country.get(), self.genre.get(), self.movies.get(), self.tvShows.get())
             category = " IS NULL " if not self.tvShows.get() and not self.movies.get() else " LIKE '%' " \
                 if self.tvShows.get() and self.movies.get() else " = 'TV' " if self.tvShows.get() else " = 'Films' "
             # query to match genre/country/category by all years
-            query = f"SELECT * FROM rankByCountry LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title " \
-                    f"WHERE genres LIKE '%{self.genre.get().lower()}%' " \
-                    f"AND country_name = '{self.country.get()}' " \
-                    f"AND category {category} "
-            df = pd.DataFrame(self.cursor.execute(query))
             df2021rank = pd.DataFrame(self.cursor.execute(f"SELECT show_title,season_title,MAX(cumulative_weeks_in_top_10),week,genres "
                                                           f"FROM rankByCountry "
                                                           f"LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
                                                           f"WHERE country_name = '{self.country.get()}' "
                                                           f"AND category {category} "
-                                                          # f"AND week LIKE '%2021%'"
-                                                          f"GROUP BY show_title"))
-            df2022rank = pd.DataFrame(self.cursor.execute(f"SELECT show_title,season_title,MAX(cumulative_weeks_in_top_10),week,genres "
-                                                          f"FROM rankByCountry "
-                                                          f"LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
-                                                          f"WHERE category {category} "
-                                                          # f"AND week LIKE '%2022%'"
                                                           f"GROUP BY show_title"))
             cumWeeks = df2021rank[2].apply(lambda key: int(key)).to_numpy()  # get an array of cumulative weeks column for later
-            #  TODO clean up
             # transform genres to binary to match search criteria
             df2021rank[4] = df2021rank[4].apply(lambda key: 1 if self.genre.get().lower() in key else 0)  # 4 = genre column
             df2021rank[2] = df2021rank[2].apply(lambda key: 1 if int(key) > 1 else 0)  # 2 = MAX aggregate column
@@ -230,30 +194,23 @@ class BuildGUI:
             x = df2021rank[4].to_numpy().reshape(-1, 1)
             y = df2021rank[2].to_numpy()
             model.fit(x, y)
-            # print(f"slope: {model.coef_}")
-            # print(f"intercept: {model.intercept_}")
             r_sq = model.score(x, y)
-            # print(f"coefficient of determination: {r_sq}")
-            # x = df2021rank[4].to_numpy().reshape(-1, 1)  # was 2 = genre
-            # y = df2021rank[2]                   # was 1 = MAX
-            # x = pd.get_dummies(x, drop_first=True)
-            # y = pd.get_dummies(y, drop_first=True)
             X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=5, stratify=y)
-            scaler = preprocessing.StandardScaler().fit(X_train)  # error here
+            scaler = preprocessing.StandardScaler().fit(X_train)
             X_train_scaled = scaler.transform(X_train)
-            model.fit(X_train_scaled, y_train)   # model.fit(X_train_scaled, y_train)
-            train_acc = model.score(X_train_scaled, y_train)  # train_acc = model.score(X_train_scaled, y_train)
+            model.fit(X_train_scaled, y_train)
+            train_acc = model.score(X_train_scaled, y_train)
             print(f"slope: {model.coef_}")
             print(f"intercept: {model.intercept_}")
             print(f"coefficient of determination: {r_sq}")
             print("The Accuracy for Training Set is {}%".format(round(train_acc * 100, 3)))
             X_test_scaled = scaler.transform(X_test)
-            y_pred = model.predict(X_test_scaled)  # y_pred = model.predict(X_test_scaled)
+            y_pred = model.predict(X_test_scaled)
             test_acc = accuracy_score(y_test, y_pred)
             print("The Accuracy for Test Set is {}%".format(round(test_acc * 100, 3)))
             print(classification_report(y_test, y_pred))
             # setting up confusion matrix
-            cm = confusion_matrix(y_test, y_pred)  # showing 2 categories
+            cm = confusion_matrix(y_test, y_pred)
             mpl.pyplot.figure(figsize=(12, 6))
             mpl.pyplot.title("Confusion Matrix")
             sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
@@ -267,7 +224,6 @@ class BuildGUI:
             mpl.pyplot.savefig('roc.png')
             mpl.pyplot.show()
             # setting up histogram
-            # mpl.pyplot.style.use('_mpl-gallery')
             fig, ax = mpl.pyplot.subplots()
             ax.hist(cumWeeks, bins=cumWeeks.max(), linewidth=0.5, edgecolor="white")
             ax.set(xlim=(0, cumWeeks.max()), xticks=numpy.arange(1, cumWeeks.max()),
@@ -276,7 +232,6 @@ class BuildGUI:
             mpl.pyplot.xlabel("Consecutive weeks in top 10")
             mpl.pyplot.savefig('histogram.png')
             mpl.pyplot.show()
-            # TODO add an output with a recommendation here based on accuracy score
             if test_acc > .7:
                 self.recommendLabel.configure(text=f"With a test accuracy of {round(test_acc * 100, 2)}%, there's a strong "
                                                    f"correlation \nand this project is recommended.")
@@ -286,10 +241,6 @@ class BuildGUI:
             else:
                 self.recommendLabel.configure(text=f"With a test accuracy of {round(test_acc * 100, 2)}%, there doesn't "
                                                    f"appear to be much correlation.  \nThis project isn't recommended.")
-            # ROC receiver operative characteristic curve
-            # pearson residuals
-            # predicted vs actual
-            b = -1
         except TypeError as TErr:
             print(TErr)
         except sqlite3.DatabaseError as DBErr:
@@ -416,55 +367,20 @@ def resetDatabase() -> None:
 
 
 def main():
+    # uncomment the next to lines to rebuild databases from scratch
     # resetDatabase()
     # initializeDatabase()
     cursor = con.cursor()
     root = Tk()
-    # results = cursor.execute("SELECT * FROM rankByCountry")
-    # print(cursor.description)
-    # print(results.fetchmany(10))
-    # mov = cg.search_movie("the matrix")
-    # print(mov.getID())
-    # print(genreCrawl("Pasión de Gavilanes"))
-
-    # name = list(map(lambda word: word.capitalize(), s.split()))
-    # print(" ".join(name).strip())
-    # movie = cg.get_movie(cg.search_movie("the matrix")[0].getID())
-    # print(movie.get('genres'))
-    # url = "https://www.imdb.com/title/tt" + mov[0].getID()
-    # webbrowser.open(url, new=2, autoraise=True)
     print("Updating tables")
     updateDatabase()
-    df5 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title, genres FROM rankByCountry "
-                                      "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
-                                      "WHERE genreInfo.genres IS NULL ORDER BY show_title"))
-
     app = BuildGUI(con, root)
     root.mainloop()
-    args = ['title', 'genres']  # for creating variable search queries from user selected categories,  not for this module
-    query = f"SELECT {(lambda x: ', '.join(x))(args)} FROM genreInfo ORDER BY title"
-    df = pd.DataFrame(cursor.execute(query))
-    df.rename(mapper=lambda x: args[x], axis=1, inplace=True)  # using the args list to rename columns
-    # rename the columns for the csv
-    # genreCSV = df.to_csv('excel files/genre-info.csv', index=False)
-    df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo WHERE genres = 'none' ORDER BY title"))
-    df = pd.DataFrame(cursor.execute("SELECT * FROM genreInfo WHERE genres LIKE '%drama%'"))
-
-    # df2 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry WHERE season_title = '' ORDER BY show_title"))
-    # df3 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), season_title FROM rankByCountry ORDER BY show_title"))
-    # df4 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title) FROM rankByCountry ORDER BY show_title"))
-    # df5 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), week, season_title FROM rankByCountry "
-    #                                 "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
-    #                                 "WHERE genres IS NULL ORDER BY show_title"))
-    # df6 = pd.DataFrame(cursor.execute("SELECT DISTINCT(show_title), week FROM rankByCountry "
-    #                                 "LEFT JOIN genreInfo ON rankByCountry.show_title = genreInfo.title "
-    #                                 "WHERE genres IS NULL ORDER BY show_title"))
     cursor.close()
     if con:
         con.close()
 
 
-sys.stdout.reconfigure(encoding='utf-8')
 con = sqlite3.connect("netflix.db")
 cg = Cinemagoer()
 
